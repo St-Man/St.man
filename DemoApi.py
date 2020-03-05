@@ -3,6 +3,8 @@ import tornado.ioloop
 import os
 import pickle
 from datetime import datetime
+from mac_vendor_lookup import MacLookup
+
 
 opentime = datetime.now()
 
@@ -25,12 +27,7 @@ class ConnectionTimeHandler(tornado.web.RequestHandler):
 # The handler of the numberofvictims request.
 class NumberOfVictimsHandler(tornado.web.RequestHandler):
     def get(self):
-        i = 0
-        # We count how many keys are there in the victims dictionary.Thats how
-        # many victims are connected.
-        for key in victims:
-            i = i+1
-        response = {'number of connected victims': i}
+        response = {'number of connected victims': len(victims)}
         self.write(response)
         response.clear()
 
@@ -40,9 +37,12 @@ class ConnectedVictimsHandler(tornado.web.RequestHandler):
     def get(self):
         # We read the file and add the dictionary values to the empty response
         # dictionary.Then we return the response dictionary.
-        response = {}
+        response = {'victims': []}
         for key in victims:
-            response.update({key: victims[key]})
+            response['victims'].append({'IP': victims[key]['Victims IP'],
+                                        'MAC': victims[key]['Victims MAC'],
+                                        'Manufacturer': MacLookup().lookup(
+                                        victims[key]['Victims MAC'])})
         self.write(response)
         response.clear()
 
